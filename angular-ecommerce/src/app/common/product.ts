@@ -8,5 +8,4 @@ export class Product {
     unitsInStock: number
     dataCreated: string
     lastUpdated: Date
-
 }
