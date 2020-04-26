@@ -9,7 +9,7 @@ import { ProductCategory } from '../common/product-category';
   providedIn: 'root'
 })
 export class ProductService {
- 
+
   private baseUrl = 'http://localhost:8080/api/products';
 
   private categoryUrl = 'http://localhost:8080/api/product-category';
@@ -23,9 +23,20 @@ export class ProductService {
 
     return this.httpClient.get<Product>(productUrl);
   }
-  
 
-  getProductList(theCategoryId: number): Observable<Product[]>{
+  getProductListPaginate(thePage: number,
+                         thePageSize: number,
+                         theCategoryId: number): Observable<GetResponseProducts> {
+
+    // need to build URL based on category id, page and size 
+    const searchUrl = `${this.baseUrl}/search/findByCategoryId?id=${theCategoryId}`
+                    + `&page=${thePage}&size=${thePageSize}`;
+
+    return this.httpClient.get<GetResponseProducts>(searchUrl);
+  }
+
+
+  getProductList(theCategoryId: number): Observable<Product[]> {
 
     // need to build URL based on category id 
     //http://localhost:8080/api/products/search/findByCategoryId?id=4
@@ -41,19 +52,21 @@ export class ProductService {
   }
 
   searchProducts(theKeyword: string) {
-   // need to build URL based on keyword
-   const searchUrl = `${this.baseUrl}/search/findByNameContaining?name=${theKeyword}`;
+    // need to build URL based on keyword
+    const searchUrl = `${this.baseUrl}/search/findByNameContaining?name=${theKeyword}`;
 
-   return this.getProducts(searchUrl);
+    return this.getProducts(searchUrl);
   }
 
 
   private getProducts(searchUrl: string): Observable<Product[]> {
-    return this.httpClient.get<GetResponseProducts>(searchUrl).pipe(map(response => response._embedded.products));
+    return this.httpClient
+               .get<GetResponseProducts>(searchUrl)
+               .pipe(map(response => response._embedded.products));
   }
 }
 
-interface GetResponseProducts{
+interface GetResponseProducts {
   _embedded: {
     products: Product[];
   }
@@ -65,7 +78,7 @@ interface GetResponseProducts{
   }
 }
 
-interface GetResponseProductCategory{
+interface GetResponseProductCategory {
   _embedded: {
     productCategory: ProductCategory[];
   }
